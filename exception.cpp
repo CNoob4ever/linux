@@ -5,6 +5,9 @@ Exception::Exception(int& err_code,const char* err_str)
 {
 }
 
+Exception::~Exception()
+{}
+
 std::string
 Exception::toString()
 {
@@ -25,6 +28,10 @@ Exception::getMessage()
 
 MmapError::MmapError(const std::string& func_name,int& err_code,const char* err_str)
     :Exception(err_code,err_str),func_name_(func_name)
+{
+}
+
+MmapError::~MmapError()
 {
 }
 

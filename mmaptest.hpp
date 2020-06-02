@@ -10,6 +10,8 @@ public:
     virtual ~MmapTest();
 
     virtual void run_test();
+
+    static void maptest();
 };
 
 #endif
