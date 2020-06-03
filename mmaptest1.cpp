@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
+#include <system_error>
 
 #include <unistd.h>
 
@@ -18,21 +19,30 @@ MmapTest1::~MmapTest1()
 void
 MmapTest1::run_test()
 {
-    long length = sysconf(_SC_PAGESIZE);
-    
-    Mmap* mem[95] = {NULL};
-    for(auto& i : mem)
-	i = new Mmap(NULL,length,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS,-1,0);
-    
-    std::thread threads[100];
-    for(int i = 0; i < 95; ++i)
-	threads[i] = std::thread(MmapTest1::maptest,mem[i]);
+    try
+    {
+	long length = sysconf(_SC_PAGESIZE);
 
-    for(int i = 95; i < 100; ++i)
-	threads[i] = std::thread(MmapTest1::advisetest,mem[0]);
+	Mmap* mem[95] = {NULL};
+	for(auto& i : mem)
+	    i = new Mmap(NULL,length,PROT_READ | PROT_WRITE,MAP_PRIVATE | MAP_ANONYMOUS,-1,0);
 
-    for(auto& i : mem)
-	delete i;
+	std::thread* threads[100];
+	for(int i = 0; i < 95; ++i)
+	    threads[i] = new std::thread(MmapTest1::maptest,mem[i]);
+
+	for(int i = 95; i < 100; ++i)
+	    threads[i] = new std::thread(MmapTest1::advisetest,mem[0]);
+
+//	for(int i = 0;i < 100; ++i)
+//	    threads[i]->detach();
+	
+//	for(auto& i : mem)
+//	    delete i;
+    }catch(std::system_error& e)
+    {
+	std::cout << "system error: " << e.code() << " " << e.what() << std::endl;  
+    }
 }
 
 void

@@ -5,6 +5,7 @@
 #include <thread>
 #include <cstring>
 #include <iostream>
+#include <system_error>
 
 #include <unistd.h>
 
@@ -17,13 +18,25 @@ MmapTest::~MmapTest()
 void
 MmapTest::run_test()
 {
-    std::thread threads[1000];
+    try
+    {
+	std::thread* threads[1000] = { NULL };
+	
+	for(int i = 0; i < 1000; ++i)
+	    threads[i] = new std::thread(MmapTest::maptest);
 
-    for(int i = 0; i < 1000; ++i)
-	threads[i] = std::thread(MmapTest::maptest);
-
-    for(auto& t : threads)
-	t.join();
+//	for(int i = 0; i < 1000;++i)
+//	{
+//	    if(threads[i] != NULL)
+//		threads[i]->detach();
+//	}
+    
+    }catch(std::system_error& e)
+    {
+	std::cout<< "system error: " << e.code() << std::endl
+		 << e.code().message() << std::endl
+	         << e.what() << std::endl;
+    }
 }
 
 void
